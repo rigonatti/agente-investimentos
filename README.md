@@ -94,6 +94,8 @@ npm install
 pm2 restart agente-investimentos
 ```
 
+Isso também acontece automaticamente: um webhook do GitHub (via Tailscale Funnel, servido pelo `webhook` já rodando no Pi) dispara esses mesmos passos a cada push na `main`.
+
 ## Deploy no Render
 
 O repositório já inclui um `render.yaml` (Blueprint). No painel do Render, ao criar o serviço a partir dele, informe `ANTHROPIC_API_KEY`, `SESSION_SECRET` e `AUTH_PASSWORD_HASH` (o `AUTH_USERS` já vem definido no blueprint).

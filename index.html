@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Agente de Investimentos</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 <script src="theme.js"></script>
 <style>
   :root {
@@ -50,9 +51,16 @@
     position: relative;
     text-align: center;
     margin-bottom: 40px;
+    padding-top: 56px;
+  }
+  .greeting-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: var(--text);
   }
   header h1 {
-    font-size: 2rem;
+    font-size: 1.4rem;
     margin: 0 0 8px;
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
     -webkit-background-clip: text;
@@ -86,6 +94,38 @@
     transition: all 0.15s ease;
   }
   .icon-btn:hover { border-color: var(--accent); color: var(--text); }
+  .nav-link {
+    width: auto;
+    height: auto;
+    padding: 8px 14px;
+    gap: 6px;
+    font-size: 0.9rem;
+  }
+  .nav-link i { font-size: 1.1rem; }
+  .icon-btn.hamburger-btn { display: none; position: absolute; top: 0; right: 0; }
+
+  @media (max-width: 640px) {
+    .container { padding: 24px 16px 60px; }
+    header { padding-top: 52px; }
+    .greeting-title { font-size: 1.4rem; }
+    header h1 { font-size: 1.2rem; }
+    .icon-btn.hamburger-btn { display: flex; }
+    .nav-icons {
+      position: absolute;
+      display: none;
+      flex-direction: column;
+      top: 44px;
+      right: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      z-index: 20;
+    }
+    .nav-icons.open { display: flex; }
+    .nav-icons .icon-btn, .nav-icons .nav-link { width: 100%; justify-content: flex-start; gap: 8px; }
+  }
   section {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -106,6 +146,7 @@
     gap: 16px;
   }
   .profile-card {
+    position: relative;
     background: var(--panel-2);
     border: 2px solid var(--border);
     border-radius: var(--radius);
@@ -113,6 +154,20 @@
     cursor: pointer;
     transition: all 0.15s ease;
     text-align: center;
+  }
+  .quiz-tag {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-2);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
   }
   .profile-card:hover {
     border-color: var(--accent);
@@ -361,11 +416,14 @@
 <body>
 <div class="container">
   <header>
-    <div class="nav-icons">
-      <a class="icon-btn" href="history.html" title="Histórico de análises" aria-label="Histórico">🕒</a>
-      <a class="icon-btn" href="options.html" title="Opções" aria-label="Opções">⚙️</a>
-      <button class="icon-btn" id="themeToggle" type="button" title="Alternar tema" aria-label="Alternar tema" onclick="toggleTheme()">☀️</button>
+    <button class="icon-btn hamburger-btn" id="hamburgerBtn" type="button" title="Menu" aria-label="Menu"><i class="ph ph-list"></i></button>
+    <div class="nav-icons" id="navMenu">
+      <a class="icon-btn nav-link" href="history.html" title="Minhas análises" aria-label="Minhas análises"><i class="ph ph-clock-counter-clockwise"></i> Minhas análises</a>
+      <a class="icon-btn" href="options.html" title="Opções" aria-label="Opções"><i class="ph ph-gear"></i></a>
+      <button class="icon-btn" id="themeToggle" type="button" title="Alternar tema" aria-label="Alternar tema" onclick="toggleTheme()"><i class="ph ph-sun"></i></button>
+      <button class="icon-btn" id="logoutBtn" type="button" title="Sair" aria-label="Sair"><i class="ph ph-sign-out"></i></button>
     </div>
+    <div class="greeting-title" id="userBadge"></div>
     <h1>Agente de Investimentos</h1>
     <p>Analise contratos, ativos e receba uma carteira sugerida para o seu perfil</p>
   </header>
@@ -373,20 +431,25 @@
   <section>
     <h2>1. Seu perfil</h2>
     <div class="profiles" id="profiles">
-      <div class="profile-card" data-profile="conservador">
-        <div class="icon">🛡️</div>
-        <h3>Conservador</h3>
-        <p>60% RF / 40% RV · risco baixo</p>
+      <div class="profile-card" data-profile="protetor">
+        <div class="icon"><i class="ph ph-shield"></i></div>
+        <h3>Protetor</h3>
+        <p>70% RF / 30% RV · risco baixo</p>
       </div>
-      <div class="profile-card" data-profile="moderado">
-        <div class="icon">⚖️</div>
-        <h3>Moderado</h3>
+      <div class="profile-card" data-profile="equilibrado">
+        <div class="icon"><i class="ph ph-scales"></i></div>
+        <h3>Equilibrado</h3>
         <p>50% RF / 50% RV · risco médio</p>
       </div>
-      <div class="profile-card" data-profile="agressivo">
-        <div class="icon">🚀</div>
-        <h3>Agressivo</h3>
-        <p>30% RF / 70% RV · risco alto</p>
+      <div class="profile-card" data-profile="dinamico">
+        <div class="icon"><i class="ph ph-chart-line-up"></i></div>
+        <h3>Dinâmico</h3>
+        <p>30% RF / 70% RV · risco médio-alto</p>
+      </div>
+      <div class="profile-card" data-profile="visionario">
+        <div class="icon"><i class="ph ph-rocket-launch"></i></div>
+        <h3>Visionário</h3>
+        <p>15% RF / 85% RV · risco alto</p>
       </div>
     </div>
   </section>
@@ -407,9 +470,9 @@
   </section>
 
   <section>
-    <h2>3. Documentos (opcional, até 3 arquivos, 10MB cada)</h2>
+    <h2>3. Documentos (opcional, até 5 arquivos, 10MB cada)</h2>
     <div class="dropzone" id="dropzone">
-      <div>📎 Arraste PDF, CSV ou XLSX aqui, ou clique para selecionar</div>
+      <div><i class="ph ph-paperclip"></i> Arraste PDF, CSV ou XLSX aqui, ou clique para selecionar</div>
       <input type="file" id="fileInput" multiple accept=".pdf,.csv,.xlsx" style="display:none" />
     </div>
     <div class="file-list" id="fileList"></div>
@@ -465,7 +528,7 @@
     </div>
 
     <div class="actions" style="margin-top:16px; justify-content:flex-start;">
-      <button class="btn btn-secondary" id="downloadImageBtn">📷 Baixar imagem</button>
+      <button class="btn btn-secondary" id="downloadImageBtn"><i class="ph ph-download-simple"></i> Baixar imagem</button>
     </div>
   </section>
 
@@ -476,9 +539,9 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="format.js"></script>
+<script src="quiz-data.js"></script>
+<script src="risk-quiz.js"></script>
 <script>
-  const STORAGE_KEY = 'agenteInvestimentos.settings';
-
   let selectedProfile = null;
   let selectedFiles = [];
 
@@ -501,22 +564,55 @@
   const carteiraGrid = document.getElementById('carteiraGrid');
   const pontosAtencaoBox = document.getElementById('pontosAtencaoBox');
   const downloadImageBtn = document.getElementById('downloadImageBtn');
+  const userBadge = document.getElementById('userBadge');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const navMenu = document.getElementById('navMenu');
 
-  function loadUserSettings() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch (e) {
-      return {};
+  hamburgerBtn.addEventListener('click', () => navMenu.classList.toggle('open'));
+
+  AgenteFormat.getMe().then((me) => {
+    if (me) userBadge.textContent = 'Oi, ' + (me.displayName || me.username);
+  });
+
+  logoutBtn.addEventListener('click', () => AgenteFormat.logout());
+
+  function selectProfileCard(profileKey) {
+    document.querySelectorAll('.profile-card').forEach((c) => c.classList.remove('selected'));
+    const card = profilesEl.querySelector(`[data-profile="${profileKey}"]`);
+    if (card) {
+      card.classList.add('selected');
+      selectedProfile = profileKey;
     }
   }
+
+  function markRecommendedCard(profileKey) {
+    document.querySelectorAll('.profile-card .quiz-tag').forEach((el) => el.remove());
+    const card = profilesEl.querySelector(`[data-profile="${profileKey}"]`);
+    if (card) {
+      const tag = document.createElement('span');
+      tag.className = 'quiz-tag';
+      tag.textContent = 'Baseado nas suas respostas';
+      card.appendChild(tag);
+    }
+  }
+
+  AgenteFormat.getSettings().then((settings) => {
+    if (settings.perfilRisco) {
+      selectProfileCard(settings.perfilRisco.perfil);
+      markRecommendedCard(settings.perfilRisco.perfil);
+    } else {
+      openRiskQuiz((result) => {
+        selectProfileCard(result.perfil);
+        markRecommendedCard(result.perfil);
+      });
+    }
+  });
 
   profilesEl.addEventListener('click', (e) => {
     const card = e.target.closest('.profile-card');
     if (!card) return;
-    document.querySelectorAll('.profile-card').forEach((c) => c.classList.remove('selected'));
-    card.classList.add('selected');
-    selectedProfile = card.dataset.profile;
+    selectProfileCard(card.dataset.profile);
   });
 
   dropzone.addEventListener('click', () => fileInput.click());
@@ -531,8 +627,8 @@
 
   function addFiles(fileListInput) {
     for (const file of fileListInput) {
-      if (selectedFiles.length >= 3) {
-        showError('Máximo de 3 arquivos por análise.');
+      if (selectedFiles.length >= 5) {
+        showError('Máximo de 5 arquivos por análise.');
         break;
       }
       if (file.size > 10 * 1024 * 1024) {
@@ -550,9 +646,9 @@
     selectedFiles.forEach((file, i) => {
       const item = document.createElement('div');
       item.className = 'file-item';
-      item.innerHTML = `<span>📄 ${file.name}</span>`;
+      item.innerHTML = `<span><i class="ph ph-file"></i> ${file.name}</span>`;
       const btn = document.createElement('button');
-      btn.textContent = '✕';
+      btn.innerHTML = '<i class="ph ph-x"></i>';
       btn.addEventListener('click', () => {
         selectedFiles.splice(i, 1);
         renderFileList();
@@ -596,26 +692,25 @@
       return;
     }
 
-    const userSettings = loadUserSettings();
-
-    const formData = new FormData();
-    formData.append('profile', selectedProfile);
-    formData.append('question', questionEl.value.trim());
-    formData.append('objetivo', objetivoEl.value);
-    formData.append('webSearch', webSearchToggle.checked ? 'true' : 'false');
-    formData.append('model', userSettings.model || 'sonnet');
-    formData.append('userSettings', JSON.stringify({
-      descricao: userSettings.descricao || '',
-      valorDisponivel: userSettings.valorDisponivel || '',
-      objetivos: userSettings.objetivos || [],
-    }));
-    selectedFiles.forEach((file) => formData.append('files', file));
-
     analyzeBtn.disabled = true;
     loadingEl.style.display = 'block';
 
     try {
+      const userSettings = await AgenteFormat.getSettings();
+
+      const formData = new FormData();
+      formData.append('profile', selectedProfile);
+      formData.append('question', questionEl.value.trim());
+      formData.append('objetivo', objetivoEl.value);
+      formData.append('webSearch', webSearchToggle.checked ? 'true' : 'false');
+      formData.append('model', userSettings.model || 'haiku');
+      selectedFiles.forEach((file) => formData.append('files', file));
+
       const res = await fetch('/analyze', { method: 'POST', body: formData });
+      if (res.status === 401) {
+        window.location.href = '/login.html';
+        return;
+      }
       const data = await res.json();
 
       if (!res.ok) {
@@ -648,20 +743,6 @@
 
       pontosAtencaoBox.innerHTML = AgenteFormat.renderPontosAtencaoHtml(data.pontosAtencao);
 
-      AgenteFormat.saveHistoryEntry({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-        date: nowDate.toISOString(),
-        profile: selectedProfile,
-        objetivo: objetivoEl.value || null,
-        question: questionEl.value.trim(),
-        model: userSettings.model || 'sonnet',
-        parecer: data.parecer,
-        carteira: data.carteira,
-        resumoExecutivo: data.resumoExecutivo || null,
-        pontosAtencao: data.pontosAtencao || [],
-        valorDisponivel,
-      });
-
       resultsEl.style.display = 'block';
     } catch (err) {
       showError(err.message);
@@ -685,7 +766,7 @@
       showError('Não foi possível gerar a imagem: ' + err.message);
     } finally {
       downloadImageBtn.disabled = false;
-      downloadImageBtn.textContent = '📷 Baixar imagem';
+      downloadImageBtn.innerHTML = '<i class="ph ph-download-simple"></i> Baixar imagem';
     }
   });
 

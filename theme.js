@@ -27,7 +27,8 @@
     var btn = document.getElementById('themeToggle');
     if (!btn) return;
     var theme = document.documentElement.getAttribute('data-theme');
-    btn.textContent = theme === 'light' ? '🌙' : '☀️';
+    var icon = btn.querySelector('i');
+    if (icon) icon.className = theme === 'light' ? 'ph ph-moon' : 'ph ph-sun';
     btn.title = theme === 'light' ? 'Mudar para modo escuro' : 'Mudar para modo claro';
   };
 })();

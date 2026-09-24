@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Opções — Agente de Investimentos</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 <script src="theme.js"></script>
 <style>
   :root {
@@ -38,9 +39,33 @@
     transition: background 0.15s ease, color 0.15s ease;
   }
   .container { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
-  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 8px; }
-  header h1 { font-size: 1.5rem; margin: 0; }
+  header { position: relative; display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 8px; padding-left: 52px; }
+  header h1 { font-size: 1.1rem; margin: 0; color: var(--muted); font-weight: 600; }
+  .back-fixed { position: absolute; top: 0; left: 0; }
   .header-actions { display: flex; gap: 8px; }
+  .icon-btn.hamburger-btn { display: none; }
+
+  @media (max-width: 640px) {
+    .container { padding: 24px 16px 60px; }
+    header { flex-wrap: wrap; }
+    header h1 { font-size: 1.3rem; }
+    .icon-btn.hamburger-btn { display: inline-flex; }
+    .header-actions {
+      display: none;
+      position: absolute;
+      top: 44px;
+      right: 0;
+      flex-direction: column;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      z-index: 20;
+    }
+    .header-actions.open { display: flex; }
+    .header-actions .icon-btn, .header-actions a.back { width: 100%; justify-content: flex-start; }
+  }
   a.back, .icon-btn {
     color: var(--muted);
     text-decoration: none;
@@ -50,9 +75,13 @@
     padding: 8px 14px;
     background: var(--panel);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
   .icon-btn { font-size: 1rem; padding: 8px 12px; }
   a.back:hover, .icon-btn:hover { border-color: var(--accent); color: var(--text); }
+  .greeting { color: var(--text); font-size: 1.4rem; font-weight: 800; margin-bottom: 2px; }
 
   section {
     background: var(--panel);
@@ -143,6 +172,21 @@
   .btn-secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
   .btn-primary:hover, .btn-secondary:hover { opacity: 0.85; }
 
+  .risco-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .risco-card i { font-size: 2rem; color: var(--accent); }
+  .risco-card .info { flex: 1; }
+  .risco-card .info strong { display: block; font-size: 1.05rem; }
+  .risco-card .info small { color: var(--muted); font-size: 0.78rem; }
+  .risco-empty { color: var(--muted); font-size: 0.9rem; margin: 0 0 14px; }
+
   #savedMsg {
     display: none;
     background: rgba(47, 208, 138, 0.12);
@@ -158,15 +202,25 @@
 <body>
 <div class="container">
   <header>
-    <h1>Opções</h1>
-    <div class="header-actions">
-      <button class="icon-btn" id="themeToggle" type="button" title="Alternar tema" aria-label="Alternar tema" onclick="toggleTheme()">☀️</button>
-      <a class="back" href="history.html">🕒 Histórico</a>
-      <a class="back" href="index.html">← Voltar</a>
+    <a class="icon-btn back-fixed" href="index.html" title="Voltar" aria-label="Voltar"><i class="ph ph-arrow-left"></i></a>
+    <div>
+      <div class="greeting" id="greeting"></div>
+      <h1>Opções</h1>
+    </div>
+    <button class="icon-btn hamburger-btn" id="hamburgerBtn" type="button" title="Menu" aria-label="Menu"><i class="ph ph-list"></i></button>
+    <div class="header-actions" id="navMenu">
+      <a class="back" href="history.html"><i class="ph ph-clock-counter-clockwise"></i> Minhas análises</a>
+      <button class="icon-btn" id="themeToggle" type="button" title="Alternar tema" aria-label="Alternar tema" onclick="toggleTheme()"><i class="ph ph-sun"></i></button>
+      <button class="icon-btn" id="logoutBtn" type="button" title="Sair" aria-label="Sair"><i class="ph ph-sign-out"></i></button>
     </div>
   </header>
 
   <div id="savedMsg">Preferências salvas.</div>
+
+  <section>
+    <h2>Perfil de risco</h2>
+    <div id="perfilRiscoContent"></div>
+  </section>
 
   <section>
     <h2>Sobre você</h2>
@@ -220,16 +274,23 @@
     <button class="btn btn-secondary" id="resetBtn">Restaurar padrão</button>
     <button class="btn btn-primary" id="saveBtn">Salvar</button>
   </div>
+
+  <section id="adminSection" style="display:none;">
+    <h2>Administração</h2>
+    <div class="hint">Editar o prompt que o sistema usa para gerar as análises de todos os usuários.</div>
+    <a class="btn btn-secondary" href="admin.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;"><i class="ph ph-shield-check"></i> Abrir painel de admin</a>
+  </section>
 </div>
 
+<script src="format.js"></script>
+<script src="quiz-data.js"></script>
+<script src="risk-quiz.js"></script>
 <script>
-  const STORAGE_KEY = 'agenteInvestimentos.settings';
-
   const DEFAULTS = {
     descricao: '',
     valorDisponivel: '',
     objetivos: [],
-    model: 'sonnet',
+    model: 'haiku',
   };
 
   const descricaoEl = document.getElementById('descricao');
@@ -237,14 +298,52 @@
   const objetivosGrid = document.getElementById('objetivosGrid');
   const modelOptions = document.getElementById('modelOptions');
   const savedMsg = document.getElementById('savedMsg');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const greetingEl = document.getElementById('greeting');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const navMenu = document.getElementById('navMenu');
+  const perfilRiscoContent = document.getElementById('perfilRiscoContent');
+
+  hamburgerBtn.addEventListener('click', () => navMenu.classList.toggle('open'));
+
+  logoutBtn.addEventListener('click', () => AgenteFormat.logout());
+  AgenteFormat.getMe().then((me) => {
+    if (!me) return;
+    greetingEl.textContent = 'Oi, ' + (me.displayName || me.username);
+    if (me.isAdmin) document.getElementById('adminSection').style.display = 'block';
+  });
+
+  function renderPerfilRisco(perfilRisco) {
+    if (!perfilRisco) {
+      perfilRiscoContent.innerHTML = [
+        '<p class="risco-empty">Você ainda não respondeu o questionário de perfil de risco.</p>',
+        '<button class="btn btn-primary" id="startQuizBtn" type="button">Responder questionário</button>',
+      ].join('');
+    } else {
+      const info = RiskQuiz.PERFIS_RISCO[perfilRisco.perfil];
+      perfilRiscoContent.innerHTML = [
+        '<div class="risco-card">',
+        '  <i class="ph ' + info.icon + '"></i>',
+        '  <div class="info">',
+        '    <strong>' + info.nome + '</strong>',
+        '    <small>Respondido em ' + AgenteFormat.formatDate(perfilRisco.respondidoEm) + '</small>',
+        '  </div>',
+        '  <button class="btn btn-secondary" id="startQuizBtn" type="button">Refazer questionário</button>',
+        '</div>',
+      ].join('');
+    }
+    document.getElementById('startQuizBtn').addEventListener('click', () => {
+      openRiskQuiz(() => loadSettings());
+    });
+  }
 
   let selectedModel = DEFAULTS.model;
 
-  function loadSettings() {
+  async function loadSettings() {
     let settings = DEFAULTS;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) settings = { ...DEFAULTS, ...JSON.parse(raw) };
+      const remote = await AgenteFormat.getSettings();
+      settings = { ...DEFAULTS, ...remote };
     } catch (e) {
       settings = DEFAULTS;
     }
@@ -258,6 +357,7 @@
 
     selectedModel = settings.model || DEFAULTS.model;
     updateModelCards();
+    renderPerfilRisco(settings.perfilRisco || null);
   }
 
   function updateModelCards() {
@@ -273,7 +373,8 @@
     updateModelCards();
   });
 
-  document.getElementById('saveBtn').addEventListener('click', () => {
+  document.getElementById('saveBtn').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
     const objetivos = Array.from(objetivosGrid.querySelectorAll('input[type="checkbox"]:checked')).map((cb) => cb.value);
 
     const settings = {
@@ -283,17 +384,20 @@
       model: selectedModel,
     };
 
+    btn.disabled = true;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      await AgenteFormat.saveSettings(settings);
       savedMsg.style.display = 'block';
       setTimeout(() => { savedMsg.style.display = 'none'; }, 2500);
     } catch (e) {
-      alert('Não foi possível salvar as preferências neste navegador.');
+      alert('Não foi possível salvar as preferências.');
+    } finally {
+      btn.disabled = false;
     }
   });
 
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    localStorage.removeItem(STORAGE_KEY);
+  document.getElementById('resetBtn').addEventListener('click', async () => {
+    await AgenteFormat.saveSettings(DEFAULTS);
     loadSettings();
   });
 

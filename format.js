@@ -1,11 +1,16 @@
 (function () {
-  var HISTORICO_KEY = 'agenteInvestimentos.historico';
-  var MAX_HISTORICO = 50;
-
   var PERFIL_LABELS = {
-    conservador: 'Conservador',
-    moderado: 'Moderado',
-    agressivo: 'Agressivo',
+    protetor: 'Protetor',
+    equilibrado: 'Equilibrado',
+    dinamico: 'Dinâmico',
+    visionario: 'Visionário',
+  };
+
+  var PERFIL_BADGE_CLASS = {
+    protetor: 'badge-protetor',
+    equilibrado: 'badge-equilibrado',
+    dinamico: 'badge-dinamico',
+    visionario: 'badge-visionario',
   };
 
   var OBJETIVO_LABELS = {
@@ -19,30 +24,52 @@
     outro: 'Outro',
   };
 
-  function getHistory() {
-    try {
-      var raw = localStorage.getItem(HISTORICO_KEY);
-      var lista = raw ? JSON.parse(raw) : [];
-      return Array.isArray(lista) ? lista : [];
-    } catch (e) {
-      return [];
+  async function apiFetch(url, options) {
+    var opts = Object.assign({}, options);
+    if (!(opts.body instanceof FormData)) {
+      opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
     }
+    var res = await fetch(url, opts);
+    if (res.status === 401) {
+      window.location.href = '/login.html';
+      throw new Error('Sessão expirada.');
+    }
+    return res;
   }
 
-  function saveHistoryEntry(entry) {
-    var historico = getHistory();
-    historico.unshift(entry);
-    if (historico.length > MAX_HISTORICO) historico = historico.slice(0, MAX_HISTORICO);
-    try { localStorage.setItem(HISTORICO_KEY, JSON.stringify(historico)); } catch (e) {}
+  async function getMe() {
+    var res = await apiFetch('/api/me');
+    if (!res.ok) return null;
+    return res.json();
   }
 
-  function deleteHistoryEntry(id) {
-    var historico = getHistory().filter(function (item) { return item.id !== id; });
-    try { localStorage.setItem(HISTORICO_KEY, JSON.stringify(historico)); } catch (e) {}
+  async function logout() {
+    await apiFetch('/logout', { method: 'POST' });
+    window.location.href = '/login.html';
   }
 
-  function clearHistory() {
-    try { localStorage.removeItem(HISTORICO_KEY); } catch (e) {}
+  async function getSettings() {
+    var res = await apiFetch('/api/settings');
+    if (!res.ok) return {};
+    return res.json();
+  }
+
+  async function saveSettings(settings) {
+    await apiFetch('/api/settings', { method: 'PUT', body: JSON.stringify(settings) });
+  }
+
+  async function getHistory() {
+    var res = await apiFetch('/api/history');
+    if (!res.ok) return [];
+    return res.json();
+  }
+
+  async function deleteHistoryEntry(id) {
+    await apiFetch('/api/history/' + encodeURIComponent(id), { method: 'DELETE' });
+  }
+
+  async function clearHistory() {
+    await apiFetch('/api/history', { method: 'DELETE' });
   }
 
   function formatCurrency(value) {
@@ -100,8 +127,11 @@
   }
 
   window.AgenteFormat = {
+    getMe: getMe,
+    logout: logout,
+    getSettings: getSettings,
+    saveSettings: saveSettings,
     getHistory: getHistory,
-    saveHistoryEntry: saveHistoryEntry,
     deleteHistoryEntry: deleteHistoryEntry,
     clearHistory: clearHistory,
     formatDate: formatDate,
@@ -111,6 +141,7 @@
     renderCarteiraHtml: renderCarteiraHtml,
     renderPontosAtencaoHtml: renderPontosAtencaoHtml,
     PERFIL_LABELS: PERFIL_LABELS,
+    PERFIL_BADGE_CLASS: PERFIL_BADGE_CLASS,
     OBJETIVO_LABELS: OBJETIVO_LABELS,
   };
 })();

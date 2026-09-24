@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agente de Investimentos</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<script src="theme.js"></script>
+<style>
+  :root {
+    --bg: #0f1420;
+    --panel: #161d2e;
+    --panel-2: #1e2739;
+    --border: #2a3548;
+    --text: #e8ecf4;
+    --muted: #8b96ab;
+    --accent: #4f8cff;
+    --accent-2: #2fd08a;
+    --danger: #ff5c6c;
+    --warn: #f5b84f;
+    --radius: 14px;
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f6fb;
+    --panel: #ffffff;
+    --panel-2: #eef1f8;
+    --border: #dbe1ec;
+    --text: #1a2233;
+    --muted: #667085;
+    --accent: #3b6fe0;
+    --accent-2: #1f9d6c;
+    --danger: #d8384a;
+    --warn: #b9791f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+  header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  header h1 {
+    font-size: 2rem;
+    margin: 0 0 8px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header p {
+    color: var(--muted);
+    margin: 0;
+  }
+  .nav-icons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 8px;
+  }
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--text); }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  section h2 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .profiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .profile-card {
+    background: var(--panel-2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+  .profile-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .profile-card.selected {
+    border-color: var(--accent);
+    background: rgba(79, 140, 255, 0.12);
+  }
+  .profile-card .icon { font-size: 2rem; margin-bottom: 8px; }
+  .profile-card h3 { margin: 0 0 6px; font-size: 1.1rem; }
+  .profile-card p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .dropzone.dragover {
+    border-color: var(--accent);
+    background: rgba(79, 140, 255, 0.08);
+    color: var(--text);
+  }
+  .file-list {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  .file-item button {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 110px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+
+  select.objetivo-select {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+  }
+  select.objetivo-select:focus { outline: none; border-color: var(--accent); }
+
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 16px;
+  }
+  .switch-row .label { font-size: 0.9rem; }
+  .switch-row .label small { display: block; color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+  .switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    transition: background 0.15s ease;
+  }
+  .switch .slider::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+  }
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(20px); }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+  button.btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+  .btn-primary:hover:not(:disabled), .btn-secondary:hover:not(:disabled) { opacity: 0.85; }
+
+  #loading { display: none; text-align: center; padding: 20px; color: var(--muted); }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #error { display: none; background: rgba(255, 92, 108, 0.1); border: 1px solid var(--danger); color: var(--danger); border-radius: 10px; padding: 14px; margin-bottom: 24px; }
+
+  #results { display: none; }
+  .parecer-box {
+    background: var(--panel-2);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px;
+    line-height: 1.6;
+  }
+  .parecer-box p { margin: 0 0 12px; }
+  .parecer-box p:last-child { margin-bottom: 0; }
+  .verdict {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+  }
+  .verdict-yes { background: rgba(47, 208, 138, 0.18); color: var(--accent-2); }
+  .verdict-no { background: rgba(255, 92, 108, 0.18); color: var(--danger); }
+  .verdict-maybe { background: rgba(245, 184, 79, 0.18); color: var(--warn); }
+  .carteira-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .carteira-item {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .carteira-item .pct {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent-2);
+  }
+  .carteira-item .ativo {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .carteira-item .valor {
+    margin-top: 4px;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .report-card {
+    background: var(--panel);
+  }
+  .report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .report-title { margin: 0; font-size: 1.3rem; }
+  .report-sub { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+  .report-logo { width: 32px; height: 32px; flex-shrink: 0; }
+  .report-macro {
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .report-macro .destaque { color: var(--accent); font-weight: 600; margin-top: 6px; }
+  .report-card h3 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin: 24px 0 16px;
+  }
+  .report-card h3:first-of-type { margin-top: 0; }
+  .pontos-lista {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .pontos-lista li { margin-bottom: 6px; }
+
+  .disclaimer {
+    margin-top: 24px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="nav-icons">
+      <a class="icon-btn" href="history.html" title="Histórico de análises" aria-label="Histórico">🕒</a>
+      <a class="icon-btn" href="options.html" title="Opções" aria-label="Opções">⚙️</a>
+      <button class="icon-btn" id="themeToggle" type="button" title="Alternar tema" aria-label="Alternar tema" onclick="toggleTheme()">☀️</button>
+    </div>
+    <h1>Agente de Investimentos</h1>
+    <p>Analise contratos, ativos e receba uma carteira sugerida para o seu perfil</p>
+  </header>
+
+  <section>
+    <h2>1. Seu perfil</h2>
+    <div class="profiles" id="profiles">
+      <div class="profile-card" data-profile="conservador">
+        <div class="icon">🛡️</div>
+        <h3>Conservador</h3>
+        <p>60% RF / 40% RV · risco baixo</p>
+      </div>
+      <div class="profile-card" data-profile="moderado">
+        <div class="icon">⚖️</div>
+        <h3>Moderado</h3>
+        <p>50% RF / 50% RV · risco médio</p>
+      </div>
+      <div class="profile-card" data-profile="agressivo">
+        <div class="icon">🚀</div>
+        <h3>Agressivo</h3>
+        <p>30% RF / 70% RV · risco alto</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Objetivo desta análise</h2>
+    <select class="objetivo-select" id="objetivo">
+      <option value="">Selecione um objetivo (opcional)</option>
+      <option value="reserva_emergencia">Reserva de emergência</option>
+      <option value="aposentadoria">Aposentadoria</option>
+      <option value="compra_imovel">Compra de imóvel</option>
+      <option value="educacao">Educação</option>
+      <option value="independencia_financeira">Independência financeira</option>
+      <option value="viagem">Viagem</option>
+      <option value="crescimento_patrimonio">Crescimento de patrimônio</option>
+      <option value="outro">Outro</option>
+    </select>
+  </section>
+
+  <section>
+    <h2>3. Documentos (opcional, até 3 arquivos, 10MB cada)</h2>
+    <div class="dropzone" id="dropzone">
+      <div>📎 Arraste PDF, CSV ou XLSX aqui, ou clique para selecionar</div>
+      <input type="file" id="fileInput" multiple accept=".pdf,.csv,.xlsx" style="display:none" />
+    </div>
+    <div class="file-list" id="fileList"></div>
+  </section>
+
+  <section>
+    <h2>4. Sua pergunta</h2>
+    <textarea id="question" placeholder="Ex: Analisa esses ativos para meu perfil? Vale a pena investir nesse FII?"></textarea>
+
+    <div class="switch-row">
+      <div class="label">
+        Busca na web
+        <small>Permite ao agente pesquisar dados de mercado atualizados</small>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="webSearchToggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="actions" style="margin-top:16px;">
+      <button class="btn btn-secondary" id="clearBtn">Limpar</button>
+      <button class="btn btn-primary" id="analyzeBtn">Analisar</button>
+    </div>
+  </section>
+
+  <div id="error"></div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div>Analisando com o agente...</div>
+  </div>
+
+  <section id="results">
+    <div class="report-card" id="reportCard">
+      <div class="report-header">
+        <div>
+          <h2 class="report-title">Report de Investimentos</h2>
+          <div class="report-sub" id="reportSub"></div>
+        </div>
+        <img class="report-logo" src="favicon.svg" alt="" />
+      </div>
+
+      <div class="report-macro" id="reportMacro" style="display:none;"></div>
+
+      <h3>Parecer</h3>
+      <div class="parecer-box" id="parecerBox"></div>
+
+      <h3>Carteira sugerida</h3>
+      <div class="carteira-grid" id="carteiraGrid"></div>
+
+      <div id="pontosAtencaoBox"></div>
+    </div>
+
+    <div class="actions" style="margin-top:16px; justify-content:flex-start;">
+      <button class="btn btn-secondary" id="downloadImageBtn">📷 Baixar imagem</button>
+    </div>
+  </section>
+
+  <div class="disclaimer">
+    As análises geradas são educacionais e não constituem recomendação de investimento formal. Consulte um profissional certificado antes de investir.
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="format.js"></script>
+<script>
+  const STORAGE_KEY = 'agenteInvestimentos.settings';
+
+  let selectedProfile = null;
+  let selectedFiles = [];
+
+  const profilesEl = document.getElementById('profiles');
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const fileListEl = document.getElementById('fileList');
+  const objetivoEl = document.getElementById('objetivo');
+  const questionEl = document.getElementById('question');
+  const webSearchToggle = document.getElementById('webSearchToggle');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const errorEl = document.getElementById('error');
+  const loadingEl = document.getElementById('loading');
+  const resultsEl = document.getElementById('results');
+  const reportCard = document.getElementById('reportCard');
+  const reportSub = document.getElementById('reportSub');
+  const reportMacro = document.getElementById('reportMacro');
+  const parecerBox = document.getElementById('parecerBox');
+  const carteiraGrid = document.getElementById('carteiraGrid');
+  const pontosAtencaoBox = document.getElementById('pontosAtencaoBox');
+  const downloadImageBtn = document.getElementById('downloadImageBtn');
+
+  function loadUserSettings() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  profilesEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.profile-card');
+    if (!card) return;
+    document.querySelectorAll('.profile-card').forEach((c) => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedProfile = card.dataset.profile;
+  });
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    addFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', () => addFiles(fileInput.files));
+
+  function addFiles(fileListInput) {
+    for (const file of fileListInput) {
+      if (selectedFiles.length >= 3) {
+        showError('Máximo de 3 arquivos por análise.');
+        break;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showError(`Arquivo ${file.name} excede 10MB.`);
+        continue;
+      }
+      selectedFiles.push(file);
+    }
+    renderFileList();
+    fileInput.value = '';
+  }
+
+  function renderFileList() {
+    fileListEl.innerHTML = '';
+    selectedFiles.forEach((file, i) => {
+      const item = document.createElement('div');
+      item.className = 'file-item';
+      item.innerHTML = `<span>📄 ${file.name}</span>`;
+      const btn = document.createElement('button');
+      btn.textContent = '✕';
+      btn.addEventListener('click', () => {
+        selectedFiles.splice(i, 1);
+        renderFileList();
+      });
+      item.appendChild(btn);
+      fileListEl.appendChild(item);
+    });
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = 'block';
+  }
+
+  function hideError() {
+    errorEl.style.display = 'none';
+  }
+
+  clearBtn.addEventListener('click', () => {
+    selectedProfile = null;
+    selectedFiles = [];
+    objetivoEl.value = '';
+    questionEl.value = '';
+    webSearchToggle.checked = false;
+    document.querySelectorAll('.profile-card').forEach((c) => c.classList.remove('selected'));
+    renderFileList();
+    hideError();
+    resultsEl.style.display = 'none';
+  });
+
+  analyzeBtn.addEventListener('click', async () => {
+    hideError();
+    resultsEl.style.display = 'none';
+
+    if (!selectedProfile) {
+      showError('Selecione um perfil de investidor.');
+      return;
+    }
+    if (!questionEl.value.trim()) {
+      showError('Digite sua pergunta.');
+      return;
+    }
+
+    const userSettings = loadUserSettings();
+
+    const formData = new FormData();
+    formData.append('profile', selectedProfile);
+    formData.append('question', questionEl.value.trim());
+    formData.append('objetivo', objetivoEl.value);
+    formData.append('webSearch', webSearchToggle.checked ? 'true' : 'false');
+    formData.append('model', userSettings.model || 'sonnet');
+    formData.append('userSettings', JSON.stringify({
+      descricao: userSettings.descricao || '',
+      valorDisponivel: userSettings.valorDisponivel || '',
+      objetivos: userSettings.objetivos || [],
+    }));
+    selectedFiles.forEach((file) => formData.append('files', file));
+
+    analyzeBtn.disabled = true;
+    loadingEl.style.display = 'block';
+
+    try {
+      const res = await fetch('/analyze', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro ao analisar.');
+      }
+
+      const nowDate = new Date();
+      const perfilLabel = AgenteFormat.PERFIL_LABELS[selectedProfile] || selectedProfile;
+      const subPartes = [perfilLabel];
+      if (objetivoEl.value) subPartes.push(AgenteFormat.OBJETIVO_LABELS[objetivoEl.value] || objetivoEl.value);
+      subPartes.push(AgenteFormat.formatDate(nowDate.toISOString()));
+      reportSub.textContent = subPartes.join(' · ');
+
+      if (data.resumoExecutivo) {
+        const r = data.resumoExecutivo;
+        reportMacro.innerHTML = `
+          ${r.mesReferencia ? `<strong>${AgenteFormat.escapeHtml(r.mesReferencia)}</strong><br>` : ''}
+          ${r.cenarioMacro ? AgenteFormat.escapeHtml(r.cenarioMacro) : ''}
+          ${r.destaque ? `<div class="destaque">${AgenteFormat.escapeHtml(r.destaque)}</div>` : ''}
+        `;
+        reportMacro.style.display = 'block';
+      } else {
+        reportMacro.style.display = 'none';
+      }
+
+      parecerBox.innerHTML = AgenteFormat.renderParecerHtml(data.parecer);
+
+      const valorDisponivel = userSettings.valorDisponivel || null;
+      carteiraGrid.innerHTML = AgenteFormat.renderCarteiraHtml(data.carteira, valorDisponivel);
+
+      pontosAtencaoBox.innerHTML = AgenteFormat.renderPontosAtencaoHtml(data.pontosAtencao);
+
+      AgenteFormat.saveHistoryEntry({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+        date: nowDate.toISOString(),
+        profile: selectedProfile,
+        objetivo: objetivoEl.value || null,
+        question: questionEl.value.trim(),
+        model: userSettings.model || 'sonnet',
+        parecer: data.parecer,
+        carteira: data.carteira,
+        resumoExecutivo: data.resumoExecutivo || null,
+        pontosAtencao: data.pontosAtencao || [],
+        valorDisponivel,
+      });
+
+      resultsEl.style.display = 'block';
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      analyzeBtn.disabled = false;
+      loadingEl.style.display = 'none';
+    }
+  });
+
+  downloadImageBtn.addEventListener('click', async () => {
+    downloadImageBtn.disabled = true;
+    downloadImageBtn.textContent = 'Gerando imagem...';
+    try {
+      const bg = getComputedStyle(document.body).backgroundColor;
+      const canvas = await html2canvas(reportCard, { backgroundColor: bg, scale: 2 });
+      const link = document.createElement('a');
+      link.download = `analise-investimento-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      showError('Não foi possível gerar a imagem: ' + err.message);
+    } finally {
+      downloadImageBtn.disabled = false;
+      downloadImageBtn.textContent = '📷 Baixar imagem';
+    }
+  });
+
+  updateThemeToggleIcon();
+</script>
+</body>
+</html>

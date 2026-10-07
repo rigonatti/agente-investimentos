@@ -71,7 +71,7 @@ publish() {
   say "Build e reinício do container"
   remote "cd /srv/apps/agente && chmod -R u=rwX,go=rX src && docker compose build && docker compose up -d"
 }
-HEALTH=("https://agente.rigonatti.com/login.html|200")
+HEALTH=("https://agente.rigonatti.com/login.html|200" "https://investimento.rigonatti.com/login.html|200")
 
 git_step
 publish

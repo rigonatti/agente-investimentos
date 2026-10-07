@@ -3,7 +3,7 @@
 Consultor de investimentos com Claude (Node 20, Express, SDK da Anthropic). Login por usuário e senha.
 
 ## Onde roda
-- URL: https://agente.rigonatti.com (e https://investimento.rigonatti.com, que redireciona para ele)
+- URLs: https://agente.rigonatti.com e https://investimento.rigonatti.com (o app responde nos dois; cada endereço tem a própria sessão de login, então é preciso entrar em cada um)
 - Servidor: container `agente` em `/srv/apps/agente` (src/, data/, compose.yml, .env)
 - Dados por usuário (opções, perfil de risco, histórico): JSON em `/srv/apps/agente/data` (volume persistente)
 - Repositório: github.com/rigonatti/agente-investimentos (via SSH)
